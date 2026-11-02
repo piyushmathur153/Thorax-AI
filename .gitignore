@@ -1,0 +1,19 @@
+# Virtual Environment
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Heavy clinical dataset 
+data/
+
+# Model checkpoints & weights
+models/
+*.pth
+
+# IDE & System files
+.vscode/
+.idea/
+.DS_Store
