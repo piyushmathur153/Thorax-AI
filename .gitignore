@@ -1,19 +1,27 @@
 # Virtual Environment
 venv/
 env/
+.venv/
 
-# Python cache
+# Python Cache
 __pycache__/
 *.pyc
+*.pyo
 
 # Heavy clinical dataset 
 data/
-
-# Model checkpoints & weights
-models/
-*.pth
+dataset/
+datasets/
+*.zip
+*.tar.gz
 
 # IDE & System files
 .vscode/
 .idea/
 .DS_Store
+Thumbs.db
+
+# Node / React 
+node_modules/
+frontend/dist/
+frontend/.vite/
