@@ -182,7 +182,11 @@ async def run_diagnostic_pipeline(file: UploadFile = File(...)) -> JSONResponse:
     except Exception as exc:
         logger.warning("Quality assessment fallback triggered: %s", exc)
         quality_passed, sharpness, contrast, quality_feedback = True, 0.0, 0.0, "Quality gate bypassed."
-
+    if not quality_passed :
+        raise HTTPException(
+            status_code= 422 ,
+            detail = quality_feedback
+        )
     # 3. Model Preprocessing & Forward Pass
     image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
     pil_image = Image.fromarray(image_rgb)
@@ -198,21 +202,38 @@ async def run_diagnostic_pipeline(file: UploadFile = File(...)) -> JSONResponse:
     confidence = tb_prob if is_positive else normal_prob
     diagnostic_label = "Tuberculosis Detected" if is_positive else "Normal / No TB Infiltration"
 
-# 4. Explainability Localization (Grad-CAM)
+# 4. Explainability & Spatial Localization Pipeline (Grad-CAM)
     try:
+        # Initialize Grad-CAM targeting the terminal convolutional layer of DenseNet-121
         target_layer = model.features[-1]
         gradcam = GradCAM(model, target_layer)
         
-        heatmap = gradcam.generate_heatmap(
-            input_tensor=input_tensor, 
-            class_idx=1 if is_positive else 0
-        )
+        # Clinical Rule: Restrict pathological saliency heatmaps strictly to positive cases
+        if not is_positive:
+            # For healthy/normal radiographs, bypass heatmap rendering to prevent false-positive visual artifacts
+            cam_overlay_bgr = image_bgr.copy()
+            gradcam_uri = encode_cv2_to_base64(cam_overlay_bgr)
+        else:
+            # Generate activation heatmap strictly optimized for the Tuberculosis pathology class (class_idx = 1)
+            heatmap = gradcam.generate_heatmap(
+                input_tensor=input_tensor, 
+                class_idx=1
+            )
+            
+            # Convert OpenCV BGR radiograph to RGB color space as expected by overlay_heatmap
+            image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
+            
+            # Superimpose heat intensity over pulmonary consolidation zones
+            cam_res = overlay_heatmap(image_rgb, heatmap)
+            superimposed_rgb = cam_res[0] if isinstance(cam_res, tuple) else cam_res
+            
+            # Convert blended RGB radiograph back to BGR format prior to Base64 payload encoding
+            cam_overlay_bgr = cv2.cvtColor(superimposed_rgb, cv2.COLOR_RGB2BGR)
+            gradcam_uri = encode_cv2_to_base64(cam_overlay_bgr)
 
-        cam_res = overlay_heatmap(image_bgr,heatmap)
-        cam_overlay_bgr = cam_res[0] if isinstance(cam_res , tuple) else cam_res
-        gradcam_uri = encode_cv2_to_base64(cam_overlay_bgr)
     except Exception as exc:
-        logger.error("Grad-CAM generation encountered an exception: %s", exc, exc_info=True)
+        logger.error("Grad-CAM generation encountered an unexpected exception: %s", exc, exc_info=True)
+        # Fallback to unprocessed radiograph in case of computation failure
         gradcam_uri = encode_cv2_to_base64(image_bgr)
 
     original_uri = encode_cv2_to_base64(image_bgr)

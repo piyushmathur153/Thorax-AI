@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+
+
+:root {
+  font-size: 17px;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-clinical-report,
+  #printable-clinical-report * {
+    visibility: visible;
+  }
+  #printable-clinical-report {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+}
+
+@layer base {
+  body {
+    font-family: 'Outfit'  sans-serif;
+    background-color: #030712;
+    color: #f8fafc;
+    overflow-x: hidden;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Custom subtle grid pattern for radiograph inspection viewport */
+.bg-clinical-grid {
+  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
