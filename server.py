@@ -4,6 +4,7 @@ Production-grade FastAPI inference engine with Quality Gating and Grad-CAM local
 """
 import re
 import os
+import gc
 import io
 import base64
 import logging
@@ -16,7 +17,7 @@ import torch
 import torchvision.transforms as transforms
 from fastapi import FastAPI, File, UploadFile, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse , FileResponse
 from fastapi.staticfiles import StaticFiles
 
 # Core Machine Learning & Clinical Modules
@@ -34,6 +35,8 @@ logging.basicConfig(
 logger = logging.getLogger("ThoraxAI-Core")
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# to stop memory spike on render`s single-core CPU
+torch.set_num_threads(1)
 MODEL_PATH = os.path.join("models", "best_model.pth")
 FRONTEND_DIST_DIR = os.path.join("frontend", "dist")
 
@@ -281,7 +284,7 @@ async def run_diagnostic_pipeline(file: UploadFile = File(...)) -> JSONResponse:
             "recommendation": clinical_action
         }
     }
-
+    gc.collect()
     return JSONResponse(status_code=status.HTTP_200_OK, content=response_payload)
 
 

@@ -31,7 +31,7 @@ import {
   Trash2
 } from 'lucide-react';
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL = window.location.port === '5173'? 'http://localhost:8000/api/v1':'/api/v1';
 
 export default function App() {
   const [selectedFile, setSelectedFile] = useState(null);
