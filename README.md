@@ -79,6 +79,9 @@ What separates **ThoraxAI** from standard academic prototypes:
    * *The Problem:* Multi-server setups create CORS conflicts, higher latency, and increased hosting costs.
    * *Our Edge:* A unified multi-stage Docker build compiles the React 18 production bundle directly into FastAPI, delivering a sub-second, single-container service.
 
+6. Zero-Data-Retention & Instant Clinical Referral:
+   * The Problem: Storing sensitive patient medical scans on cloud servers introduces strict privacy violations, while clinics often lack instant physical documentation for specialist handoff.
+   * Our Edge: ThoraxAI generates immediate print-ready referral receipts and caches diagnostic history strictly within client-side browser storage—guaranteeing zero server-side patient data leaks.
 ---
 
 ## 5. Dataset & Citation Credit
@@ -123,39 +126,51 @@ Deploying a deep convolutional model (DenseNet-121) alongside real-time Grad-CAM
 
 ```text
 [ User Upload (DICOM / JPEG / PNG) ]
-               │
-               ▼
-┌─────────────────────────────────────────────────────────────┐
-│ STEP 1: Pre-Inference Quality Assurance Gate (OpenCV)       │
-│ • Laplacian Variance Blur Check (variance >= 100.0)         │
-│ • Contrast Distribution & Mean Pixel Intensity Validation   │
-│ • Instant rejection of invalid, non-medical, or blurry scans│
-└──────────────────────────────┬──────────────────────────────┘
-                               │ (Valid Scan)
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│ STEP 2: Deep Learning Inference (DenseNet-121)              │
-│ • Dense inter-layer feature concatenation                   │
-│ • Pre-trained weights fine-tuned on pulmonary opacities     │
-│ • Softmax-calibrated probability generation                 │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-               ┌───────────────┴───────────────┐
-               ▼                               ▼
-┌─────────────────────────────┐ ┌─────────────────────────────┐
-│ STEP 3: Grad-CAM Engine     │ │ STEP 4: Clinical Triage     │
-│ • Target: denseblock4       │ │ • Urgency Level Assignment  │
-│ • Jet Colormap Overlay      │ │ • Actionable Follow-up Path │
-│ • Anatomical Heatmap URI    │ │ • Confirmatory Test Advice  │
-└──────────────┬──────────────┘ └──────────────┬──────────────┘
-               └───────────────┬───────────────┘
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│ STEP 5: Delivery & State Management                         │
-│ • FastAPI Async JSON Response Payload                       │
-│ • Explicit gc.collect() memory clearing                     │
-│ • High-contrast React 18 / Tailwind Dashboard View          │
-└─────────────────────────────────────────────────────────────┘
+                |
+                v
++-------------------------------------------------------------+
+| STEP 1: Pre-Inference Quality Assurance Gate (OpenCV)       |
+| • Laplacian Variance Blur Check (variance >= 100.0)         |
+| • Contrast Distribution & Mean Pixel Intensity Validation   |
+| • Instant rejection of invalid, non-medical, or blurry scans|
++-------------------------------------------------------------+
+                                |
+                           (Valid Scan)
+                                |
+                                v
++-------------------------------------------------------------+
+| STEP 2: Deep Learning Inference (DenseNet-121)              |
+| • Dense inter-layer feature concatenation                   |
+| • Pre-trained weights fine-tuned on pulmonary opacities     |
+| • Softmax-calibrated probability generation                 |
++-------------------------------------------------------------+
+                |                               |
+                v                               v
++-----------------------------+ +-----------------------------+
+| STEP 3: Grad-CAM Engine     | | STEP 4: Clinical Triage     |
+| • Target: denseblock4       | | • Urgency Level Assignment  |
+| • Jet Colormap Overlay      | | • Actionable Follow-up Path |
+| • Anatomical Heatmap URI    | | • Confirmatory Test Advice  |
++-----------------------------+ +-----------------------------+
+                \                               /
+                 \-----------------------------/
+                                |
+                                v
++-------------------------------------------------------------+
+| STEP 5: Delivery & State Management                         |
+| • FastAPI Async JSON Response Payload                       |
+| • Explicit gc.collect() memory clearing                     |
+| • High-contrast React 18 / Tailwind Dashboard View          |
++-------------------------------------------------------------+
+                                |
+                                v
++-------------------------------------------------------------+
+| STEP 6: Clinical Handoff & Privacy-First Audit Trail        |
+| • Printable Doctor Referral Slip (Heatmap & Probabilities)  |
+| • Zero Cloud Storage: Session History Cached in LocalStorage|
++-------------------------------------------------------------+
+
+
 ```
 
 ---
@@ -170,7 +185,9 @@ Deploying a deep convolutional model (DenseNet-121) alongside real-time Grad-CAM
   * **URGENT_REFERRAL:** Priority referral for CBNAAT (GeneXpert) / Sputum Smear Microscopy confirmation within 24–48 hours.
   * **ROUTINE_MONITOR / NORMAL:** No radiographic evidence of active TB; periodic routine surveillance or differential follow-up if symptoms persist.
 * **High-Accessibility Clinical UI:** Designed with medical-grade dark slate aesthetic, clear triage status badges, and interactive original vs. heatmap side-by-side comparison.
-
+* One-Click Clinical Referral Receipt: Instantly generates a print-ready referral slip containing patient metadata, AI diagnostic findings, triage urgency level, and the Grad-CAM heatmap for fast specialist handoff.
+* Local Diagnostic History (Privacy-First): Caches previous scans and evaluation results directly within browser local storage, enabling healthcare staff to review audit trails without sending patient data to external servers.
+*
 ---
 
 ## 9. Model Performance & Benchmark Metrics
