@@ -22,10 +22,12 @@
 
 ## 2. Critical Evaluation & Testing Notice (Please Read First)
 
-### A. Cold Start Delay (Render Free Tier Cloud Hosting)
-ThoraxAI is hosted on Render's free tier. In accordance with platform policy, free web services enter an idle/hibernation state after 15 minutes of zero traffic.
-* **Initial Load:** The **first** page load after inactivity may take between **50 to 90 seconds** as the cloud container provisions resources and initializes PyTorch weights in memory.
-* Subsequent page navigations and interactions are instantaneous.
+### A. Deployment & Availability Notice (Render Cloud Hosting)
+
+ThoraxAI is hosted on Render's container platform with continuous automated health monitoring:
+* **Active Warm State:** Automated Uptime monitoring runs at 5-minute intervals to mitigate platform cold starts, ensuring immediate responsiveness during evaluation.
+* **Fallback Initialization:** If accessed during rare infrastructure resets, the initial boot and PyTorch weight allocation on CPU may take up to 45–60 seconds. All subsequent screening requests and navigations execute instantaneously.
+*
 
 ### B. Scan Inference Turnaround Time (5 - 7 Seconds)
 A full diagnostic screening run takes approximately **5 to 7 seconds** per Chest X-ray. This latency is intentional and engineered for resource efficiency:
