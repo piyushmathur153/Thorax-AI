@@ -1,88 +1,70 @@
+# ThoraxAI — Explainable Pulmonary TB Screening & Triage System
 
+> An end-to-end, low-footprint deep learning web application for rapid Tuberculosis screening from chest radiographs using DenseNet-121 and Grad-CAM explainability.
 
-# ThoraxAI — Clinical Pulmonary AI Diagnostic & Triage Assistant
-
-**Neural Storm 2026 | Track 03: Human Impact | Problem Statement: HI-01**
-
----
-
-## 1. Project Overview & Metadata
-
-* **Project Title:** ThoraxAI
-* **Problem Statement ID:** HI-01 (Medical Image Diagnostic Assistant)
-* **Track:** Track 03 — Human Impact (Healthcare, Education & Social Good)
-* **Hackathon:** Neural Storm 2026 (November 2 - 4, 2026)
-* **Live Web Service (Deployment):** https://thorax-ai.onrender.com
-* **GitHub Repository:** https://github.com/piyushmathur153/Thorax-AI
-* **Team Name:** BlitzNova
-* **Team Members:** Piyush Mathur (Team Leader), Priyanshu Mathur (Team Member)
-* **Primary Language & Core Frameworks:** Python 3.11, FastAPI, PyTorch (CPU-only), React 18, Vite, Tailwind CSS, Docker
+🌐 **Live Web App:** [thorax-ai.onrender.com](https://thorax-ai.onrender.com)  
+🛠️ **Tech Stack:** Python 3.11 • PyTorch (CPU) • FastAPI • OpenCV • React 18 • Tailwind CSS • Docker
 
 ---
 
-## 2. Critical Evaluation & Testing Notice (Please Read First)
+## 1. Overview
 
-### A. Deployment & Availability Notice (Render Cloud Hosting)
+In rural primary healthcare centers (PHCs) and district hospitals, trained radiologists are scarce, and generic "black-box" AI models output raw percentages that doctors cannot clinically trust. 
 
-ThoraxAI is hosted on Render's container platform with continuous automated health monitoring:
-* **Active Warm State:** Automated Uptime monitoring runs at 5-minute intervals to mitigate platform cold starts, ensuring immediate responsiveness during evaluation.
-* **Fallback Initialization:** If accessed during rare infrastructure resets, the initial boot and PyTorch weight allocation on CPU may take up to 45–60 seconds. All subsequent screening requests and navigations execute instantaneously.
-*
+**ThoraxAI** bridges this gap by combining computer vision with visual explainability and edge-level resource efficiency:
+- **Pre-Inference Quality Gate:** Uses OpenCV (Laplacian blur variance & contrast checks) to reject blurry, inverted, or non-medical uploads before running inference.
+- **Zero Black-Box AI (Grad-CAM):** Generates pixel-aligned anatomical heatmaps highlighting exact lung regions (apical consolidations, opacities) that triggered the prediction.
+- **Structured Clinical Triage:** Converts model probabilities into actionable medical protocols (`CRITICAL`, `URGENT_REFERRAL`, `ROUTINE_MONITOR`) along with a print-ready referral slip.
+- **<512 MB Cloud Footprint:** Engineered to run smoothly on single-threaded free-tier cloud CPU instances without GPU dependencies or Out-Of-Memory (OOM) crashes.
 
-### B. Scan Inference Turnaround Time (5 - 7 Seconds)
-A full diagnostic screening run takes approximately **5 to 7 seconds** per Chest X-ray. This latency is intentional and engineered for resource efficiency:
-* Full-resolution OpenCV Laplacian focus and contrast validation.
-* DenseNet-121 feedforward probability distribution pass.
-* Multi-layer gradient backpropagation to generate explainability heatmaps.
-* High-fidelity Jet colormap overlay rendering.
-* Explicit garbage collection cleanup to enforce the strict 512MB RAM cap.
-
-All of these run smoothly on single-threaded cloud CPU instances without requiring expensive dedicated GPU servers.
+> **Deployment Note:** Hosted on Render with continuous 5-minute automated health pings (UptimeRobot) to keep the container warm and ensure immediate responsiveness.
 
 ---
 
-## 3. Clinical Problem Statement & Approach
+## 2. Scan Inference Turnaround Time (5–7 Seconds)
 
-### Problem
-In rural primary healthcare centers (PHCs) and district hospitals, trained radiologists and pulmonologists are scarce. Tuberculosis (TB) remains a leading infectious threat, yet non-specialist physicians often struggle to detect subtle apical infiltrations, early cavitations, or distinguish motion blur from genuine pathology. Furthermore, generic "black-box" AI systems output confusing confidence percentages that clinicians cannot verify or trust.
-
-### Our Approach
-ThoraxAI is built as a clinically grounded screening and triage decision-support tool. It does not replace physicians; instead, it provides a safe, transparent, and guided diagnostic workflow:
-1. **Automated Pre-Inference Quality Filter:** Rejects unreadable or invalid scans before wasting computational cycles or making false predictions.
-2. **Dense Feature Pattern Recognition:** Employs DenseNet-121 to preserve subtle radiological patterns across all layer depths.
-3. **Zero Black-Box Explainability:** Generates pixel-aligned Grad-CAM heatmaps to show clinicians exactly which lung regions triggered the prediction.
-4. **Structured Clinical Triage:** Translates probabilities into actionable medical recommendations (Critical, Urgent Referral, Routine Surveillance).
+A full diagnostic screening run takes approximately **5 to 7 seconds** per Chest X-ray on a single-threaded cloud CPU without requiring dedicated GPUs:
+- Full-resolution OpenCV Laplacian focus and contrast validation.
+- DenseNet-121 feedforward probability distribution pass.
+- Multi-layer gradient backpropagation (`denseblock4`) to generate Grad-CAM heatmaps.
+- High-fidelity Jet colormap overlay rendering and explicit garbage collection (`gc.collect()`).
 
 ---
 
-## 4. Key Innovations & Competitive Edge (Our USP)
+## 3. Clinical Need & Triage Workflow
+
+Rural primary healthcare centers often lack trained radiologists, making early Tuberculosis detection difficult. **ThoraxAI** assists frontline doctors by filtering out blurry/invalid scans first, highlighting suspicious lung regions visually via Grad-CAM, and mapping risk scores into clear clinical actions (`CRITICAL`, `URGENT_REFERRAL`, `ROUTINE_MONITOR`).
+
+
+
+## 4. Key Innovations & Engineering Highlights
 
 What separates **ThoraxAI** from standard academic prototypes:
 
 1. **Pre-Inference Automated Gatekeeper (Quality Check):**
-   * *The Problem:* Most medical ML web tools crash or generate hallucinated false positive predictions when presented with non-medical photos, inverted scans, or severe motion blur.
-   * *Our Edge:* ThoraxAI runs an automated OpenCV-based diagnostic gate (Laplacian blur variance and dynamic contrast validation) **before** tensors reach the deep neural network.
+   - *The Problem:* Most medical ML web tools crash or generate hallucinated false-positive predictions when presented with non-medical photos, inverted scans, or severe motion blur.
+   - *The Solution:* ThoraxAI runs an automated OpenCV-based diagnostic gate (Laplacian blur variance and dynamic contrast validation) before tensors reach the deep neural network.
 
 2. **Zero "Black-Box" AI (Physician-First Trust):**
-   * *The Problem:* Doctors in primary clinics cannot ethically act on raw percentages like *"TB: 88%"*.
-   * *Our Edge:* Integrated Grad-CAM generates anatomical heatmaps highlighting exact pulmonary regions (apical consolidations, hilar opacities, pleural thickening) responsible for the classification, keeping clinicians firmly in control.
+   - *The Problem:* Doctors in primary clinics cannot ethically act on raw percentages like `"TB: 88%"`.
+   - *The Solution:* Integrated Grad-CAM generates anatomical heatmaps highlighting exact pulmonary regions (apical consolidations, hilar opacities, pleural thickening) responsible for the classification, keeping clinicians firmly in control.
 
 3. **Radical Hardware Efficiency (<512MB Cloud Budget):**
-   * *The Problem:* Advanced vision models usually demand high-cost GPU servers, making them impractical for under-funded rural clinics.
-   * *Our Edge:* Engineered specifically for zero-cost, resource-constrained runtimes via CPU-only PyTorch wheels, single-core thread throttling (`torch.set_num_threads(1)`), and active garbage-collection sweeps.
+   - *The Problem:* Advanced vision models usually demand high-cost GPU servers, making them impractical for under-funded rural clinics.
+   - *The Solution:* Engineered specifically for zero-cost, resource-constrained runtimes via CPU-only PyTorch wheels, single-core thread throttling (`torch.set_num_threads(1)`), and active garbage-collection sweeps.
 
 4. **Actionable Triage Protocol Over Raw Classification:**
-   * *The Problem:* Basic classifiers stop at simple label prediction.
-   * *Our Edge:* Directly converts risk probabilities into tiered, standard-of-care clinical actions (`CRITICAL`, `URGENT_REFERRAL`, `ROUTINE_MONITOR`) with follow-up protocols (e.g., CBNAAT / GeneXpert confirmation).
+   - *The Problem:* Basic classifiers stop at simple label prediction.
+   - *The Solution:* Directly converts risk probabilities into tiered, standard-of-care clinical actions (`CRITICAL`, `URGENT_REFERRAL`, `ROUTINE_MONITOR`) with follow-up protocols (e.g., CBNAAT / GeneXpert confirmation).
 
 5. **Self-Contained Full-Stack Deployment:**
-   * *The Problem:* Multi-server setups create CORS conflicts, higher latency, and increased hosting costs.
-   * *Our Edge:* A unified multi-stage Docker build compiles the React 18 production bundle directly into FastAPI, delivering a sub-second, single-container service.
+   - *The Problem:* Multi-server setups create CORS conflicts, higher latency, and increased hosting costs.
+   - *The Solution:* A unified multi-stage Docker build compiles the React 18 production bundle directly into FastAPI, delivering a single-container service.
 
-6. Zero-Data-Retention & Instant Clinical Referral:
-   * The Problem: Storing sensitive patient medical scans on cloud servers introduces strict privacy violations, while clinics often lack instant physical documentation for specialist handoff.
-   * Our Edge: ThoraxAI generates immediate print-ready referral receipts and caches diagnostic history strictly within client-side browser storage—guaranteeing zero server-side patient data leaks.
----
+6. **Zero-Data-Retention & Instant Clinical Referral:**
+   - *The Problem:* Storing sensitive patient medical scans on cloud servers introduces privacy risks, while clinics often lack instant physical documentation for specialist handoff.
+   - *The Solution:* ThoraxAI generates immediate print-ready referral receipts and caches diagnostic history strictly within client-side browser storage—guaranteeing zero server-side patient data retention.
+   - 
 
 ## 5. Dataset & Citation Credit
 
@@ -299,25 +281,16 @@ Access the running container at `http://localhost:7860`.
 
 ---
 
-## 14. AI Tools Disclosure (Neural Storm 2026 Rule 04 Compliance)
+## 14. Clinical & Medical Disclaimer
 
-In compliance with Rule 04 of the Neural Storm 2026 Participant Guide:
-* **GitHub Copilot & Cursor / VS Code AI:** Assisted in generating FastAPI route boilerplate, structuring Tailwind CSS UI components, and formatting asynchronous handlers.
-* **Large Language Models (ChatGPT / Claude / Gemini):** Consulted for cloud memory profiling strategies (512MB RAM budget constraints), Docker multi-stage build layer optimization, and standardizing clinical triage terminology based on WHO diagnostic standards.
+**ThoraxAI is an experimental research and educational decision-support prototype.**
 
----
-
-## 15. Mandatory Clinical & Ethical Disclaimer
-
-> **IMPORTANT CLINICAL SCREENING NOTICE:**  
-> ThoraxAI is an investigational clinical decision-support and screening research tool developed solely for educational and competition purposes during the Neural Storm 2026 Hackathon. It is **NOT** a certified medical device and is **NOT** intended to replace, supersede, or override the professional medical judgment, diagnosis, or care of a certified radiologist, pulmonologist, or qualified physician.
->
-> The probability metrics and Grad-CAM explainability heatmaps generated by this system are designed strictly to assist medical staff in prioritizing patient triage in under-resourced settings. Every AI-assisted screening outcome must be formally verified using standard confirmatory diagnostics, including certified microbiological testing (such as Sputum Smear Microscopy and CBNAAT/GeneXpert) and comprehensive clinical evaluation in accordance with national tuberculosis elimination guidelines.
+- **Not a Certified Medical Device:** This software does not replace or override the professional medical judgment, diagnosis, or care of a licensed radiologist or physician.
+- **Confirmatory Testing Required:** Probability metrics and Grad-CAM heatmaps are meant strictly for preliminary screening assistance. All findings must be verified through standard microbiological diagnostics (such as Sputum Smear Microscopy and CBNAAT/GeneXpert) and clinical evaluation.
 
 ---
 
-## 16. Acknowledgments & Credits
+## 15. Acknowledgments & Credits
 
-* **Development Team:** BlitzNova
-* **Dataset:** Tuberculosis (TB) Chest X-ray Database by Tawsifur Rahman et al.
-* **Event:** Neural Storm 2026 Hackathon (Track 03: Human Impact)
+- **Dataset:** Trained and validated on the [Tuberculosis (TB) Chest X-ray Database](https://www.kaggle.com/datasets/tawsifurrahman/tuberculosis-tb-chest-xray-dataset) curated by Tawsifur Rahman et al. (Qatar University & University of Dhaka).
+- 
