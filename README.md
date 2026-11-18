@@ -36,7 +36,6 @@ A full diagnostic screening run takes approximately **5 to 7 seconds** per Chest
 Rural primary healthcare centers often lack trained radiologists, making early Tuberculosis detection difficult. **ThoraxAI** assists frontline doctors by filtering out blurry/invalid scans first, highlighting suspicious lung regions visually via Grad-CAM, and mapping risk scores into clear clinical actions (`CRITICAL`, `URGENT_REFERRAL`, `ROUTINE_MONITOR`).
 
 
-
 ## 4. Key Innovations & Engineering Highlights
 
 What separates **ThoraxAI** from standard academic prototypes:
@@ -64,6 +63,7 @@ What separates **ThoraxAI** from standard academic prototypes:
 6. **Zero-Data-Retention & Instant Clinical Referral:**
    - *The Problem:* Storing sensitive patient medical scans on cloud servers introduces privacy risks, while clinics often lack instant physical documentation for specialist handoff.
    - *The Solution:* ThoraxAI generates immediate print-ready referral receipts and caches diagnostic history strictly within client-side browser storage—guaranteeing zero server-side patient data retention.
+   - .
    - 
 
 ## 5. Dataset & Citation Credit
